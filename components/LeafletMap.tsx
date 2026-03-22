@@ -67,7 +67,7 @@ export default function LeafletMap({ lat, lng, pgs }: LeafletMapProps) {
       center={[lat, lng]}
       zoom={14}
       scrollWheelZoom={true}
-      style={{ height: "100%", width: "100%", borderRadius: "16px" }}
+      style={{ height: "100%", width: "100%", borderRadius: "12px" }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -79,7 +79,7 @@ export default function LeafletMap({ lat, lng, pgs }: LeafletMapProps) {
       {/* User's location marker */}
       <Marker position={[lat, lng]} icon={userIcon}>
         <Popup>
-          <div style={{ textAlign: "center", fontWeight: 600 }}>
+          <div className="text-center font-semibold text-slate-900">
             📍 You are here
           </div>
         </Popup>
@@ -93,19 +93,19 @@ export default function LeafletMap({ lat, lng, pgs }: LeafletMapProps) {
           icon={pgIcon}
         >
           <Popup>
-            <div style={{ minWidth: "180px" }}>
-              <div style={{ fontWeight: 700, fontSize: "14px", marginBottom: "6px", color: "#1a1a2e" }}>
+            <div className="min-w-44 text-slate-900">
+              <div className="font-bold text-sm mb-1.5">
                 🏠 {pg.name}
               </div>
               {pg.address && (
-                <div style={{ fontSize: "12px", color: "#555", marginBottom: "4px" }}>
+                <div className="text-xs text-slate-600 mb-1">
                   {pg.address}
                 </div>
               )}
-              <div style={{ fontSize: "13px", color: "#2d6a4f", fontWeight: 600, marginBottom: "2px" }}>
+              <div className="text-sm font-semibold text-emerald-700 mb-1">
                 {formatRent(pg)}
               </div>
-              <div style={{ fontSize: "12px", color: "#666" }}>
+              <div className="text-xs text-slate-600">
                 {formatRating(pg)}
               </div>
             </div>

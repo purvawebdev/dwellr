@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import Navbar from "@/components/Navbar";
 import Providers from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Dwellr – Discover PGs Near You",
   description:
-    "Find nearby PG accommodations with real user-driven insights. Built for students in Pune.",
+    "Find nearby PG accommodations in Pune with real user-driven insights, honest ratings, and transparent pricing. Built for students.",
 };
 
 export default function RootLayout({
@@ -23,8 +24,11 @@ export default function RootLayout({
           crossOrigin=""
         />
       </head>
-      <body>
-        <Providers>{children}</Providers>
+      <body className="bg-slate-950 text-slate-100">
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

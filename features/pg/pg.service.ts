@@ -15,3 +15,7 @@ export async function getNearbyPGs(lat: number, lng: number) {
   .select("name location address rent ratings amenities")
   .limit(20);
 }
+
+export async function getPGById(id: string) {
+  return PG.findById(id);
+}
