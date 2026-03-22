@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocation } from "@/hooks/uselocation";
+import { useLocation } from "@/hooks/useLocation";
 import { usePGs } from "@/hooks/usePGs";
 import MapView from "@/components/MapView";
 
