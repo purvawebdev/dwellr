@@ -12,6 +12,6 @@ export async function getNearbyPGs(lat: number, lng: number) {
       }
     }
   })
-  .select("name location rent ratings")
+  .select("name location address rent ratings amenities")
   .limit(20);
 }

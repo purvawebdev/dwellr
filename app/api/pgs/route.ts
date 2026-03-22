@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
+    console.error("❌ /api/pgs error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
