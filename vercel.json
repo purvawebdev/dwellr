@@ -49,10 +49,5 @@
       "destination": "/explore",
       "permanent": false
     }
-  ],
-  "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
