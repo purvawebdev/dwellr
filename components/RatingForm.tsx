@@ -13,7 +13,7 @@ interface RatingFormProps {
 }
 
 export default function RatingForm({ pgId, pgName, onSubmitted, onSuccess, onClose }: RatingFormProps) {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [source, setSource] = useState<"lived_here" | "friend_told" | "other">("lived_here");
@@ -72,8 +72,8 @@ export default function RatingForm({ pgId, pgName, onSubmitted, onSuccess, onClo
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include", // Include httpOnly cookies
         body: JSON.stringify({
           pgId,
           rating,

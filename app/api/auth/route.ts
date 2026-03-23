@@ -16,29 +16,55 @@ export async function POST(req: NextRequest) {
       const validatedData = signupSchema.parse(body);
       const result = await registerUser(validatedData);
 
-      return NextResponse.json(
+      // Create response with user data
+      const response = NextResponse.json(
         {
           success: true,
           message: "User registered successfully",
-          token: result.token,
           user: result.user,
         },
         { status: 201 }
       );
+
+      // Set httpOnly cookie with token (secure flag enabled in production)
+      response.cookies.set({
+        name: "authToken",
+        value: result.token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // HTTPS only in production
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60, // 24 hours in seconds
+        path: "/",
+      });
+
+      return response;
     } else if (action === "login") {
       // Validate login data
       const validatedData = loginSchema.parse(body);
       const result = await loginUser(validatedData);
 
-      return NextResponse.json(
+      // Create response with user data
+      const response = NextResponse.json(
         {
           success: true,
           message: "Login successful",
-          token: result.token,
           user: result.user,
         },
         { status: 200 }
       );
+
+      // Set httpOnly cookie with token (secure flag enabled in production)
+      response.cookies.set({
+        name: "authToken",
+        value: result.token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // HTTPS only in production
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60, // 24 hours in seconds (should be shorter, but for now)
+        path: "/",
+      });
+
+      return response;
     } else {
       return NextResponse.json(
         { success: false, message: "Invalid action" },
@@ -60,7 +86,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Handle other errors
+    // Handle other errors - return generic message for security
     const errorMessage =
       error instanceof Error ? error.message : "Authentication failed";
     return NextResponse.json(

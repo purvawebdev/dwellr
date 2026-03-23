@@ -1,7 +1,8 @@
 import bcryptjs from "bcryptjs";
+import mongoose from "mongoose";
 import { User } from "./user.model";
 import { signToken } from "@/lib/jwt";
-import { SignupInput, LoginInput } from "./auth.validation";
+import { SignupInput, LoginInput, ChangePasswordInput } from "./auth.validation";
 
 /**
  * Hash password using bcryptjs
@@ -103,4 +104,38 @@ export async function getUserById(id: string) {
  */
 export async function updateUserProfile(id: string, data: Partial<{ name: string; bio: string; profileImage: string }>) {
   return User.findByIdAndUpdate(id, data, { new: true });
+}
+
+/**
+ * Change user password
+ */
+export async function changePassword(userId: string, data: ChangePasswordInput) {
+  // Validate that userId is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID");
+  }
+
+  // Find user by ID with password field
+  const user = await User.findById(userId).select("+password");
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Verify current password
+  const currentPasswordMatch = await comparePassword(data.currentPassword, user.password);
+  if (!currentPasswordMatch) {
+    throw new Error("Current password is incorrect");
+  }
+
+  // Hash new password
+  const hashedPassword = await hashPassword(data.newPassword);
+
+  // Update password
+  user.password = hashedPassword;
+  await user.save();
+
+  return {
+    success: true,
+    message: "Password changed successfully",
+  };
 }

@@ -45,9 +45,7 @@ export default function SuperadminDashboard() {
     setLoading(true);
     try {
       const response = await axios.get("/api/pgs/all", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
+        withCredentials: true,
       });
 
       if (response.data.success) {
@@ -73,9 +71,7 @@ export default function SuperadminDashboard() {
         `/api/pgs/${pgId}/status`,
         { status: "approved" },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -99,9 +95,7 @@ export default function SuperadminDashboard() {
         `/api/pgs/${pgId}/status`,
         { status: "rejected", rejectionReason },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
+          withCredentials: true,
         }
       );
 

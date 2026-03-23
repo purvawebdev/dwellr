@@ -37,9 +37,7 @@ export default function PGOwnerDashboard() {
     setLoading(true);
     try {
       const response = await axios.get("/api/pgs/my-pgs", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
+        withCredentials: true,
       });
 
       if (response.data.success) {

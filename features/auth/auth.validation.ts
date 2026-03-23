@@ -7,12 +7,14 @@ export const emailSchema = z
   .trim()
   .toLowerCase();
 
-// Password validation: min 6 chars, at least 1 uppercase, 1 number
+// Password validation: min 12 chars, at least 1 uppercase, 1 lowercase, 1 number, 1 special char
 export const passwordSchema = z
   .string()
-  .min(6, "Password must be at least 6 characters")
+  .min(12, "Password must be at least 12 characters")
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[0-9]/, "Password must contain at least one number");
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/[0-9]/, "Password must contain at least one number")
+  .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character (!@#$%^&*)");
 
 // Name validation
 export const nameSchema = z
@@ -42,6 +44,19 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+// Change password validation
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: passwordSchema,
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "New passwords don't match",
+  path: ["confirmPassword"],
+}).refine((data) => data.currentPassword !== data.newPassword, {
+  message: "New password must be different from current password",
+  path: ["newPassword"],
+});
+
 // Rating validation
 export const ratingSchema = z.object({
   pgId: z.string().min(1, "PG ID is required"),
@@ -54,4 +69,5 @@ export const ratingSchema = z.object({
 // Type exports
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type RatingInput = z.infer<typeof ratingSchema>;

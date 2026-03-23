@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { getUserFromRequest } from "@/lib/auth";
 import { Rating } from "@/features/pg/rating.model";
@@ -27,6 +28,14 @@ export async function POST(req: NextRequest) {
 
     // Validate rating data
     const validatedData = ratingSchema.parse(body);
+
+    // Validate pgId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(validatedData.pgId)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid PG ID" },
+        { status: 400 }
+      );
+    }
 
     // Create rating
     const rating = await Rating.create({
@@ -104,6 +113,14 @@ export async function GET(req: NextRequest) {
     if (!pgId) {
       return NextResponse.json(
         { success: false, message: "PG ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate pgId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(pgId)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid PG ID" },
         { status: 400 }
       );
     }

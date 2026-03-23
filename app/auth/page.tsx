@@ -128,6 +128,7 @@ export default function AuthPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        credentials: "include", // Include cookies in request
       });
 
       const data = await res.json();
@@ -151,9 +152,10 @@ export default function AuthPage() {
         return;
       }
 
-      // Use the login hook to set auth state
-      if (data.token && data.user) {
-        login(data.user, data.token);
+      // Use the login hook to set auth state with user data only
+      // Token is now stored in httpOnly cookie automatically
+      if (data.user) {
+        login(data.user);
 
         // Show success message
         setSuccess(mode === "login" ? "Login successful!" : "Signup successful!");

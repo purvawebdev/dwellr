@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { getPGById } from "@/features/pg/pg.service";
 
@@ -11,7 +12,8 @@ export async function GET(
 
     const { id } = await params;
 
-    if (!id || id.length !== 24) {
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid PG ID" },
         { status: 400 }

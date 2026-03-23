@@ -11,15 +11,15 @@ export interface User {
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Sync with localStorage on mount and listen for storage changes
+  // Token is stored in httpOnly cookie and is automatically sent with requests
   useEffect(() => {
     // Function to load auth state from localStorage
+    // Only user data is stored in localStorage (NOT token - token is in httpOnly cookie)
     const loadAuthState = () => {
       const storedUser = localStorage.getItem("user");
-      const storedToken = localStorage.getItem("authToken");
 
       try {
         if (storedUser) {
@@ -33,8 +33,6 @@ export function useAuth() {
         localStorage.removeItem("user");
         setUser(null);
       }
-
-      setToken(storedToken || null);
     };
 
     // Initial load
@@ -43,7 +41,7 @@ export function useAuth() {
 
     // Listen for storage events from other tabs/windows
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "user" || e.key === "authToken") {
+      if (e.key === "user") {
         loadAuthState();
       }
     };
@@ -58,17 +56,24 @@ export function useAuth() {
   const isAuthenticated = user !== null;
 
   const logout = useCallback(() => {
-    localStorage.removeItem("authToken");
+    // Clear user data from localStorage
     localStorage.removeItem("user");
     setUser(null);
-    setToken(null);
+
+    // Call logout endpoint to clear httpOnly cookie
+    fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include", // Include cookies in request
+    }).catch(() => {
+      // Silently fail if logout endpoint doesn't exist yet
+    });
   }, []);
 
-  const login = useCallback((userData: User, authToken: string) => {
-    localStorage.setItem("authToken", authToken);
+  const login = useCallback((userData: User) => {
+    // Only store user data (NOT token) in localStorage
+    // Token is automatically stored in httpOnly cookie by the API
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
-    setToken(authToken);
   }, []);
 
   const isStudent = user?.role === "student";
@@ -77,7 +82,6 @@ export function useAuth() {
 
   return {
     user,
-    token,
     isAuthenticated,
     isHydrated,
     login,

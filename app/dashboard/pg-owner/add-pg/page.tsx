@@ -41,7 +41,7 @@ const amenityOptions = [
 
 export default function AddPGPage() {
   const router = useRouter();
-  const { user, token, isPGOwner, isHydrated } = useAuth();
+  const { user, isPGOwner, isHydrated } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     address: "",
@@ -139,8 +139,8 @@ export default function AddPGPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           name: formData.name,
           address: formData.address,

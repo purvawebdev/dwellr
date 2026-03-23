@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
-import { checkToken } from "@/lib/jwt";
+import { getUserFromRequest } from "@/lib/auth";
 import { PG } from "@/features/pg/pg.model";
 
 export async function PATCH(
@@ -12,26 +13,25 @@ export async function PATCH(
 
     const { id } = await params;
 
-    // Get token from header
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid PG ID" },
+        { status: 400 }
+      );
+    }
+
+    // Get user from request (checks both Authorization header and cookies)
+    const user = getUserFromRequest(req);
+
+    if (!user) {
       return NextResponse.json(
         { success: false, message: "Missing or invalid token" },
         { status: 401 }
       );
     }
 
-    const token = authHeader.slice(7);
-    const decoded = checkToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { success: false, message: "Invalid or expired token" },
-        { status: 401 }
-      );
-    }
-
-    if (decoded.role !== "superadmin") {
+    if (user.role !== "superadmin") {
       return NextResponse.json(
         { success: false, message: "Only superadmins can update PG status" },
         { status: 403 }
@@ -58,6 +58,14 @@ export async function PATCH(
       );
     }
 
+    // Validate rejection reason length
+    if (rejectionReason && typeof rejectionReason === "string" && rejectionReason.length > 500) {
+      return NextResponse.json(
+        { success: false, message: "Rejection reason must be less than 500 characters" },
+        { status: 400 }
+      );
+    }
+
     const pg = await PG.findByIdAndUpdate(
       id,
       {
@@ -65,7 +73,7 @@ export async function PATCH(
         ...(status === "rejected" && { rejectionReason }),
       },
       { new: true }
-    ).populate("ownerId", "name email");
+    ).populate("ownerId", "name");
 
     if (!pg) {
       return NextResponse.json(
@@ -85,7 +93,7 @@ export async function PATCH(
   } catch (error) {
     console.error("[PG_STATUS_ERROR]", error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : "Failed to update PG status" },
+      { success: false, message: "Failed to update PG status" },
       { status: 500 }
     );
   }
