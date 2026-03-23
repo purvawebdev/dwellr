@@ -1,0 +1,36 @@
+# CodeRabbit Configuration
+# Auto PR reviews for Next.js + Node.js project
+
+language: en
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  path_instructions:
+    - path: "**/*"
+      instructions: |
+        Prioritize security findings. Focus on authentication/authorization flaws,
+        insecure token or cookie handling, injection risks, sensitive-data exposure,
+        missing input validation, and privilege-escalation paths.
+  path_filters:
+    # Include
+    - "app/**"
+    - "components/**"
+    - "features/**"
+    - "hooks/**"
+    - "lib/**"
+    - "config/**"
+    - "public/**"
+    - "scripts/**"
+    - "types/**"
+
+    # Exclude
+    - "!node_modules/**"
+    - "!.next/**"
+    - "!**/*.lock"
+    - "!**/.env*"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/*.md"
