@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { user, logout, isAuthenticated, isHydrated } = useAuth();
+
+  // Ensure hydration matches by not rendering auth UI until hydrated
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isHome = pathname === "/";
 
@@ -15,6 +23,14 @@ export default function Navbar() {
     { href: "/explore", label: "Explore" },
     { href: "/about", label: "About" },
   ];
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+    setMobileOpen(false);
+  };
+
+  if (!mounted) return null;
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/85 border-b border-slate-800">
@@ -41,7 +57,9 @@ export default function Navbar() {
                   <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent hidden sm:inline">dwellr</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent hidden sm:inline">
+                dwellr
+              </span>
             </Link>
           </div>
 
@@ -61,6 +79,38 @@ export default function Navbar() {
               </Link>
             ))}
           </nav>
+
+          {/* Right: User Profile & Auth */}
+          <div className="hidden md:flex items-center gap-3">
+            {mounted ? (
+              isAuthenticated && user ? (
+                <>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="hidden lg:block text-sm">
+                      <p className="font-medium text-slate-100">{user.name}</p>
+                      <p className="text-xs text-slate-400 capitalize">{user.role}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 rounded-lg border border-slate-700 text-slate-100 font-medium hover:bg-slate-800 transition-all text-sm"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/auth"
+                  className="px-6 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-500 hover:to-purple-500 transition-all text-sm"
+                >
+                  Login
+                </Link>
+              )
+            ) : null}
+          </div>
 
           {/* Mobile Hamburger */}
           <button
@@ -107,6 +157,32 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <div className="border-t border-slate-700 pt-2 mt-2">
+              {mounted ? (
+                isAuthenticated && user ? (
+                  <>
+                    <div className="px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 mb-2">
+                      <p className="font-medium text-slate-100 text-sm">{user.name}</p>
+                      <p className="text-xs text-slate-400 capitalize">{user.role}</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-700 text-slate-100 font-medium hover:bg-slate-800 transition-all text-sm"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/auth"
+                    className="block px-4 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-500 hover:to-purple-500 transition-all text-center"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Login
+                  </Link>
+                )
+              ) : null}
+            </div>
           </div>
         </nav>
       )}

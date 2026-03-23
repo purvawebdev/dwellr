@@ -3,7 +3,11 @@
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 import { usePG } from "@/hooks/usePG";
+import { useAuth } from "@/hooks/useAuth";
+import RatingForm from "@/components/RatingForm";
 
 const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
   ssr: false,
@@ -16,6 +20,52 @@ export default function PGDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const { data: pg, isLoading, error } = usePG(id);
+  const { isAuthenticated } = useAuth();
+  const [showRatingForm, setShowRatingForm] = useState(false);
+  const [ratings, setRatings] = useState<Array<{
+    _id: string;
+    pgId: string;
+    userId: {
+      _id: string;
+      name: string;
+      profileImage?: string;
+      role: string;
+    };
+    rating: number;
+    review: string;
+    source: "lived_here" | "friend_told" | "other";
+    images: string[];
+    helpful: number;
+    createdAt: string;
+  }>>([]);
+  const [loadingRatings, setLoadingRatings] = useState(false);
+  const [ratingRefresh, setRatingRefresh] = useState(0);
+
+  const fetchRatings = useCallback(async () => {
+    setLoadingRatings(true);
+    try {
+      const response = await axios.get(`/api/ratings?pgId=${id}`);
+      if (response.data.success) {
+        setRatings(response.data.data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching ratings:", error);
+    } finally {
+      setLoadingRatings(false);
+    }
+  }, [id]);
+
+  // Fetch ratings when component mounts or when rating is submitted
+  useEffect(() => {
+    if (id) {
+      fetchRatings();
+    }
+  }, [id, fetchRatings, ratingRefresh]);
+
+  const handleRatingSubmitted = () => {
+    setShowRatingForm(false);
+    setRatingRefresh(prev => prev + 1);
+  };
 
   if (isLoading) {
     return (
@@ -130,6 +180,118 @@ export default function PGDetailPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Rating Form Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-bold">
+                  Rate ({ratings.length} {ratings.length === 1 ? "review" : "reviews"})
+                </h3>
+                {isAuthenticated && (
+                  <button
+                    onClick={() => setShowRatingForm(!showRatingForm)}
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold hover:from-amber-500 hover:to-orange-500 transition-all text-sm"
+                  >
+                    {showRatingForm ? "Close" : "Add Rating"}
+                  </button>
+                )}
+              </div>
+
+              {showRatingForm && isAuthenticated && (
+                <div className="mb-8 p-6 rounded-xl bg-slate-800/50 border border-slate-700">
+                  <RatingForm pgId={id} onSubmitted={handleRatingSubmitted} />
+                </div>
+              )}
+
+              {!isAuthenticated && (
+                <div className="mb-8 p-6 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center">
+                  <p className="text-blue-300 mb-4">
+                    <Link href="/auth" className="font-semibold hover:text-blue-200 underline">
+                      Login
+                    </Link>
+                    {" "}to add a rating for this PG
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Ratings Display */}
+            {loadingRatings ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="flex items-center justify-center gap-3 text-slate-400">
+                  <div className="w-5 h-5 border-2 border-slate-700 border-t-indigo-500 rounded-full animate-spin" />
+                  <span>Loading reviews...</span>
+                </div>
+              </div>
+            ) : ratings.length > 0 ? (
+              <div className="space-y-4">
+                {ratings.map((rating) => (
+                  <div key={rating._id} className="p-5 rounded-lg bg-slate-800/30 border border-slate-700 hover:border-slate-600 transition-colors">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                          {rating.userId?.name?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <p className="font-semibold text-slate-100">{rating.userId?.name || "Anonymous"}</p>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-700/50 text-slate-300 text-xs font-medium">
+                              <span className="flex items-center gap-0.5">
+                                {"⭐".repeat(rating.rating)}
+                              </span>
+                            </span>
+                            <span className="text-xs text-slate-400 capitalize bg-slate-700/50 rounded-full px-2 py-0.5">
+                              {rating.source === "lived_here" ? "Lived here" : rating.source === "friend_told" ? "Friend told" : "Other"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500">
+                            {new Date(rating.createdAt).toLocaleDateString("en-IN")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <p className="text-slate-300 mb-4 leading-relaxed">{rating.review}</p>
+
+                    {/* Rating Images */}
+                    {rating.images && rating.images.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+                        {rating.images.map((img: string, idx: number) => (
+                          <div
+                            key={idx}
+                            className="relative aspect-square rounded-lg overflow-hidden border border-slate-600 hover:border-slate-500 transition-colors bg-slate-900/50"
+                          >
+                            <img
+                              src={img}
+                              alt={`Rating image ${idx + 1}`}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {rating.helpful !== undefined && (
+                      <div className="flex items-center gap-2 text-xs text-slate-400">
+                        👍 <span>{rating.helpful} found this helpful</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 rounded-lg bg-slate-800/30 border border-slate-700 text-center">
+                <p className="text-slate-400 mb-4">No reviews yet. Be the first to review this PG!</p>
+                {isAuthenticated && (
+                  <button
+                    onClick={() => setShowRatingForm(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold hover:from-amber-500 hover:to-orange-500 transition-all"
+                  >
+                    Write First Review
+                  </button>
+                )}
               </div>
             )}
 

@@ -22,6 +22,15 @@
       "@/*": ["./*"]
     }
   },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "noEmit": true
+    },
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
   "include": [
     "next-env.d.ts",
     "**/*.ts",

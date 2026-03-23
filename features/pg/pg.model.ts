@@ -3,6 +3,20 @@ import mongoose from "mongoose";
 const pgSchema = new mongoose.Schema({
   name: { type: String, required: true },
 
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending"
+  },
+
+  rejectionReason: String,
+
   location: {
     type: {
       type: String,
@@ -32,5 +46,6 @@ const pgSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 pgSchema.index({ location: "2dsphere" });
+pgSchema.index({ ownerId: 1 });
 
 export const PG = mongoose.models.PG || mongoose.model("PG", pgSchema);

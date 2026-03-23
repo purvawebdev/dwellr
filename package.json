@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:superadmin": "node -r dotenv/config -r ts-node/register scripts/seed-superadmin.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.94.5",
@@ -32,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

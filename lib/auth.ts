@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { checkToken } from "./jwt";
+import { checkToken, TokenPayload } from "./jwt";
 
-export function getUserFromRequest(req: NextRequest) {
+export function getUserFromRequest(req: NextRequest): TokenPayload | null {
   const authHeader = req.headers.get("authorization");
 
   if (!authHeader) return null;
