@@ -36,7 +36,7 @@ export function useLocation() {
       (err) => {
         switch (err.code) {
           case err.PERMISSION_DENIED:
-            setError("Location permission denied");
+            setError("Enable location for instant results");
             break;
           case err.POSITION_UNAVAILABLE:
             setError("Location information unavailable");

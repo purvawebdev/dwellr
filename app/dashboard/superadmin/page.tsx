@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useAuth } from "@/hooks/useAuth";
+import { CheckCircle2, Clock3, MapPin, ShieldUser, Star, XCircle } from "lucide-react";
 
 interface PGWithOwner {
   _id: string;
@@ -144,8 +145,13 @@ export default function SuperadminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-2">Superadmin Dashboard</h1>
-          <p className="text-slate-400">Manage and approve PG listings</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center">
+              <ShieldUser className="w-7 h-7 text-indigo-300" />
+            </div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Superadmin Dashboard</h1>
+          </div>
+          <p className="text-slate-400 text-lg">Manage and approve PG listings across the platform</p>
         </div>
 
         {/* Stats */}
@@ -221,7 +227,7 @@ export default function SuperadminDashboard() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="text-2xl font-bold mb-2">{pg.name}</h3>
-                    <p className="text-slate-400 mb-2">📍 {pg.address}</p>
+                    <p className="text-slate-400 mb-2 inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {pg.address}</p>
                     {pg.ownerId ? (
                       <p className="text-sm text-slate-500">
                         Owner: {typeof pg.ownerId === "string" ? pg.ownerId : pg.ownerId.name}{" "}
@@ -236,17 +242,17 @@ export default function SuperadminDashboard() {
                   <div className="flex-shrink-0 ml-4">
                     {pg.status === "approved" && (
                       <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-sm font-semibold">
-                        ✅ Approved
+                        <CheckCircle2 className="w-4 h-4" /> Approved
                       </span>
                     )}
                     {pg.status === "pending" && (
                       <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-sm font-semibold">
-                        ⏳ Pending
+                        <Clock3 className="w-4 h-4" /> Pending
                       </span>
                     )}
                     {pg.status === "rejected" && (
                       <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-red-300 text-sm font-semibold">
-                        ❌ Rejected
+                        <XCircle className="w-4 h-4" /> Rejected
                       </span>
                     )}
                   </div>
@@ -272,8 +278,9 @@ export default function SuperadminDashboard() {
                   </div>
                   <div className="p-3 rounded-lg bg-slate-700/30">
                     <p className="text-xs text-slate-400 mb-1">Avg Rating</p>
-                    <p className="text-lg font-bold text-amber-300">
-                      {pg.ratings.avg > 0 ? pg.ratings.avg.toFixed(1) : "N/A"}⭐
+                    <p className="text-lg font-bold text-amber-300 inline-flex items-center gap-1">
+                      <Star className="w-4 h-4" />
+                      {pg.ratings.avg > 0 ? pg.ratings.avg.toFixed(1) : "N/A"}
                     </p>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-700/30">
@@ -323,13 +330,13 @@ export default function SuperadminDashboard() {
                           onClick={() => handleApprove(pg._id)}
                           className="flex-1 px-4 py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-500 transition-all text-sm"
                         >
-                          ✅ Approve
+                          <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" />Approve</span>
                         </button>
                         <button
                           onClick={() => setRejectingId(pg._id)}
                           className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-500 transition-all text-sm"
                         >
-                          ❌ Reject
+                          <span className="inline-flex items-center gap-1.5"><XCircle className="w-4 h-4" />Reject</span>
                         </button>
                       </div>
                     )}

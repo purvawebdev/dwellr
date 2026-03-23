@@ -2,7 +2,7 @@
 
 import { PG } from "@/features/pg/pg.model";
 import { createPGSchema } from "@/features/pg/pg.validation";
-import { checkToken, TokenPayload } from "@/lib/jwt";
+import { getUserFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,28 +10,16 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
-    // Get token from header
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    // Support both Bearer token header and httpOnly auth cookie
+    const user = getUserFromRequest(req);
+    if (!user?.id) {
       return NextResponse.json(
         { success: false, message: "Missing or invalid token" },
         { status: 401 }
       );
     }
 
-    const token = authHeader.slice(7);
-    let decoded: TokenPayload | null = null;
-
-    try {
-      decoded = checkToken(token);
-    } catch (err) {
-      return NextResponse.json(
-        { success: false, message: "Invalid or expired token" },
-        { status: 401 }
-      );
-    }
-
-    if (!decoded || decoded.role !== "pg_owner") {
+    if (user.role !== "pg_owner") {
       return NextResponse.json(
         { success: false, message: "Only PG owners can create listings" },
         { status: 403 }
@@ -56,7 +44,7 @@ export async function POST(req: NextRequest) {
     const pg = new PG({
       name,
       address,
-      ownerId: decoded.id,
+      ownerId: user.id,
       location: {
         type: "Point",
         coordinates: [lng, lat],

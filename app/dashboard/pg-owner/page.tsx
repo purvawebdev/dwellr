@@ -25,6 +25,7 @@ export default function PGOwnerDashboard() {
   const [pgs, setPGs] = useState<PGWithRatings[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Redirect if not a PG owner (after hydration)
   useEffect(() => {
@@ -56,6 +57,36 @@ export default function PGOwnerDashboard() {
       fetchPGs();
     }
   }, [isAuthenticated, fetchPGs]);
+
+  const handleDeletePG = async (pgId: string, pgName: string) => {
+    const confirmed = window.confirm(
+      `Delete "${pgName}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setError("");
+    setDeletingId(pgId);
+
+    try {
+      const response = await axios.delete(`/api/pgs/${pgId}`, {
+        withCredentials: true,
+      });
+
+      if (response.data.success) {
+        setPGs((prev) => prev.filter((pg) => pg._id !== pgId));
+      }
+    } catch (err) {
+      console.error("Error deleting PG:", err);
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Failed to delete PG");
+      } else {
+        setError("Failed to delete PG");
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   // Show loading while hydrating
   if (!isHydrated) {
@@ -117,7 +148,7 @@ export default function PGOwnerDashboard() {
         <div className="mb-8">
           <Link
             href="/dashboard/pg-owner/add-pg"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-500 hover:to-purple-500 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-linear-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-500 hover:to-purple-500 transition-all"
           >
             + Add New PG
           </Link>
@@ -157,7 +188,7 @@ export default function PGOwnerDashboard() {
                   </div>
 
                   {/* Status Badge */}
-                  <div className="flex-shrink-0 ml-4">
+                  <div className="shrink-0 ml-4">
                     {pg.status === "approved" && (
                       <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-sm font-semibold">
                         ✅ Approved
@@ -222,6 +253,13 @@ export default function PGOwnerDashboard() {
                   >
                     View Reviews
                   </Link>
+                  <button
+                    onClick={() => handleDeletePG(pg._id, pg.name)}
+                    disabled={deletingId === pg._id}
+                    className="px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 font-medium hover:bg-red-500/30 disabled:opacity-60 disabled:cursor-not-allowed transition-all text-sm"
+                  >
+                    {deletingId === pg._id ? "Deleting..." : "Delete PG"}
+                  </button>
                 </div>
               </div>
             ))}
