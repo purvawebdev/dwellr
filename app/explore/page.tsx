@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useLocation } from "@/hooks/useLocation";
 import { usePGs } from "@/hooks/usePGs";
 import LocationPicker from "@/components/LocationPicker";
+import { type PG } from "@/hooks/usePG";
 
 const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-96 lg:h-[500px] rounded-xl overflow-hidden border border-slate-700 bg-gradient-to-r from-slate-800/50 via-slate-700/50 to-slate-800/50 animate-skeleton-shimmer" />
+    <div className="w-full h-96 lg:h-125 rounded-xl overflow-hidden border border-slate-700 bg-linear-to-r from-slate-800/50 via-slate-700/50 to-slate-800/50 animate-skeleton-shimmer" />
   ),
 });
 
@@ -95,7 +96,7 @@ export default function ExplorePage() {
               <div>
                 <h2 className="text-3xl font-bold mb-6">Nearby PGs</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {pgs.map((pg: any) => (
+                  {pgs.map((pg: PG) => (
                     <Link
                       key={pg._id}
                       href={`/pg/${pg._id}`}
@@ -106,7 +107,7 @@ export default function ExplorePage() {
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <h3 className="text-lg font-semibold line-clamp-2">🏠 {pg.name}</h3>
                           {pg.ratings && pg.ratings.count > 0 && (
-                            <span className="flex-shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-semibold whitespace-nowrap">
+                            <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-semibold whitespace-nowrap">
                               ⭐ {pg.ratings.avg.toFixed(1)}
                             </span>
                           )}
@@ -127,7 +128,7 @@ export default function ExplorePage() {
                                   ? `₹${pg.rent.min.toLocaleString()} – ₹${pg.rent.max.toLocaleString()}`
                                   : pg.rent.min
                                     ? `From ₹${pg.rent.min.toLocaleString()}`
-                                    : `Up to ₹${pg.rent.max.toLocaleString()}`}
+                                    : `Up to ₹${pg.rent.max!.toLocaleString()}`}
                               </span>
                               <span className="text-slate-500 text-xs"> /month</span>
                             </div>

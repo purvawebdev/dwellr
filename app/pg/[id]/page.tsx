@@ -156,7 +156,7 @@ export default function PGDetailPage() {
                       ? `₹${pg.rent.min.toLocaleString()} – ₹${pg.rent.max.toLocaleString()}`
                       : pg.rent.min
                         ? `From ₹${pg.rent.min.toLocaleString()}`
-                        : `Up to ₹${pg.rent.max.toLocaleString()}`}
+                        : `Up to ₹${pg.rent.max!.toLocaleString()}`}
                   </>
                 ) : (
                   "Contact for pricing"
@@ -308,10 +308,12 @@ export default function PGDetailPage() {
 
           {/* Right Column - Map */}
           <div className="lg:col-span-1">
+            <div className="sticky-top-50">
             <h3 className="text-2xl font-bold mb-4">Location on Map</h3>
             <div className="rounded-xl overflow-hidden border border-slate-700 shadow-2xl shadow-indigo-500/10 h-96">
               <LeafletMap lat={lat} lng={lng} pgs={[pg]} />
             </div>
+                 </div>
           </div>
         </div>
 

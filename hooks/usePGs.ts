@@ -1,10 +1,11 @@
 "use client";
 
+import { type PG } from "@/hooks/usePG";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 export function usePGs(lat?: number, lng?: number) {
-  return useQuery({
+  return useQuery<PG[]>({
     queryKey: ["pgs", lat, lng],
     queryFn: async () => {
       const res = await axios.get("/api/pgs", {

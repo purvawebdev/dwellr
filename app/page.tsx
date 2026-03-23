@@ -203,6 +203,26 @@ export default function Home() {
       <footer className="border-t border-slate-800 bg-slate-950/50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-slate-400 mb-4">© 2026 Dwellr · Built for students, by students</p>
+          <p className="text-slate-400 mb-4">
+            Created by Purva Palankar ·{" "}
+            <a
+              href="https://github.com/purvawebdev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-200 transition-colors"
+            >
+              GitHub
+            </a>{" "}
+            ·{" "}
+            <a
+              href="https://www.linkedin.com/in/purvapalankar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-200 transition-colors"
+            >
+              LinkedIn
+            </a>
+          </p>
           <div className="flex items-center justify-center gap-6 text-slate-400">
             <Link href="/about" className="hover:text-slate-200 transition-colors">
               About
