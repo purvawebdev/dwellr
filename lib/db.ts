@@ -28,6 +28,7 @@ export async function connectDB(): Promise<Connection> {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      autoIndex: true,
       maxPoolSize: 10, // Maintain up to 10 socket connections
       // minPoolSize: 2,  // Minimum 2 connections in the pool
       // // Other options like serverSelectionTimeoutMS, socketTimeoutMS can be added for fine-tuning
